@@ -13,18 +13,18 @@ class TodoFacade implements ITodoService {
         return this.repository.create(list);
     }
 
-    public getTodoList(id: number): ITodoList | undefined {
+    public getTodoList(id: string): ITodoList | undefined {
         return this.repository.read(id);
     }
 
-    public addTask(todoListId: number, task: ITask): ITask | undefined {
+    public addTask(todoListId: string, task: ITask): ITask | undefined {
         let list = this._getList(todoListId);
         list.tasks.push(task);
         this.repository.update(list);
         return task;
     }
 
-    public completeTask(task: ITask, todoListId: number): void {
+    public completeTask(task: ITask, todoListId: string): void {
         let list = this._getList(todoListId);
         list.tasks.map((v, i) => {
             if (v.id === task.id) {
@@ -34,7 +34,7 @@ class TodoFacade implements ITodoService {
         this.repository.update(list);
     }
 
-    private _getList(id: number): ITodoList {
+    private _getList(id: string): ITodoList {
         let list = this.repository.read(id);
 
         if (!list) {
