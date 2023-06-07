@@ -20,7 +20,11 @@
   "homepage": "https://github.com/RyTheTurtle/always-something-todo#readme",
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.2",
+    "@types/uuid": "^9.0.1",
     "ts-lint": "^4.5.1",
     "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "uuid": "^9.0.0"
   }
 }

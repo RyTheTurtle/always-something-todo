@@ -2,7 +2,6 @@ export enum Priority {
     LOW, MED, HIGH
 }
 
-
 export interface ITask {
     id: string | undefined;
     title: string;
