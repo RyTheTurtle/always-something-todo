@@ -4,8 +4,9 @@
   "description": "",
   "main": "main.js",
   "scripts": {
+    "prebuild": "tslint -c tslint.json --project tsconfig.json --fix",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start" : "npx tsc && node dist/main.js"
+    "start": "npx tsc && node dist/main.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,7 @@
   "homepage": "https://github.com/RyTheTurtle/always-something-todo#readme",
   "devDependencies": {
     "@tsconfig/recommended": "^1.0.2",
+    "ts-lint": "^4.5.1",
     "typescript": "^5.1.3"
   }
 }

@@ -3,5 +3,7 @@
         "outDir": "dist"
     },
     "extends": "@tsconfig/recommended/tsconfig.json",
-    "include": ["src/**/*.ts"]
+    "include": [
+        "src/**/*.ts"
+    ]
 }
