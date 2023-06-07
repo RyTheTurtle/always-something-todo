@@ -28,8 +28,7 @@ class TodoFacade implements ITodoService {
         let list = this._getList(todoListId);
         list.tasks.map((v, i) => {
             if (v.id === task.id) {
-                // TODO IMPLEMENT A STATUS FIELD ON TASK INTERFACE
-                // and update it here
+                v.completed = true;
             }
         });
         this.repository.update(list);
