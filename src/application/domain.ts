@@ -4,7 +4,7 @@ export enum Priority {
 
 
 export interface ITask {
-    id: number | undefined;
+    id: string | undefined;
     title: string;
     description: string | undefined;
     due_by: number;
@@ -13,7 +13,7 @@ export interface ITask {
 }
 
 export interface ITodoList {
-    id: number | undefined;
+    id: string | undefined;
     title: string;
     description: string | undefined;
     due_by: number;
