@@ -1,0 +1,24 @@
+{
+  "name": "always-something-todo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start" : "npx tsc && node dist/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RyTheTurtle/always-something-todo.git"
+  },
+  "author": "Ryan Coverick",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/RyTheTurtle/always-something-todo/issues"
+  },
+  "homepage": "https://github.com/RyTheTurtle/always-something-todo#readme",
+  "devDependencies": {
+    "@tsconfig/recommended": "^1.0.2",
+    "typescript": "^5.1.3"
+  }
+}
