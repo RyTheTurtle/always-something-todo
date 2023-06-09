@@ -2,7 +2,7 @@ import {ITodoService} from "../ports/primaryPort";
 import { ITodoRepository } from "../ports/secondaryPort";
 import { ITask, ITodoList } from "./domain";
 
-class TodoFacade implements ITodoService {
+export class TodoFacade implements ITodoService {
     private repository: ITodoRepository;
 
     constructor(repo: ITodoRepository) {

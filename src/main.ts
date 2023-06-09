@@ -1,1 +1,3 @@
-console.log("Hello, World!");
+import { cliAdapter } from "./adapters/primary/cli";
+
+cliAdapter();
