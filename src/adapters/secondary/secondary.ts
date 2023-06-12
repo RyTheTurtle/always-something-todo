@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
-import { ITodoList } from "../application/domain";
-import { ITodoRepository } from "../ports/secondaryPort";
+import { ITodoList } from "../../application/domain";
+import { ITodoRepository } from "../../ports/secondaryPort";
 
 export class InMemoryRepo implements ITodoRepository {
     private data: Map<string, ITodoList>;

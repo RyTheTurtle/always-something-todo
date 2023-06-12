@@ -9,7 +9,7 @@ import promptSync, { Prompt } from "prompt-sync";
 import { Priority } from "../../application/domain";
 import { TodoFacade } from "../../application/service";
 import { ITodoService } from "../../ports/primaryPort";
-import { InMemoryRepo } from "../secondary";
+import { InMemoryRepo } from "../secondary/secondary";
 import { todo } from "node:test";
 
 export function cliAdapter() {
