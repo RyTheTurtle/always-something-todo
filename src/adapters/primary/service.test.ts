@@ -1,4 +1,4 @@
-import { TodoFacade } from "./service";
+import { TodoFacade } from "../../application/service";
 
 describe('TodoFacade', ()=>{
     test("Hello, world", ()=> {
