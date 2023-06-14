@@ -8,8 +8,8 @@
 import promptSync, { Prompt } from "prompt-sync";
 import { Priority } from "../../application/domain";
 import { TodoFacade } from "../../application/service";
-import { ITodoService } from "../../ports/primaryPort";
-import { InMemoryRepo } from "../secondary/secondary";
+import { ITodoService } from "../../ports/primaryPort"; 
+import { InMemoryEventRepo } from "../secondary/eventRepository";
 
 export function cliAdapter() {
     // plug in our dependencies here.
@@ -18,7 +18,7 @@ export function cliAdapter() {
     // dependencies to this function. Effectively, this would just be
     // our 'main' function.
 
-    const repo = new InMemoryRepo();
+    const repo = new InMemoryEventRepo();
     const application: ITodoService = new TodoFacade(repo);
     const prompter = promptSync();
 
@@ -27,7 +27,7 @@ export function cliAdapter() {
     const promptHandlers: Map<string, PromptCommandHandler> = new Map([
         ["1", onCreateTodoListCommand],
         ["2", onAddTaskCommand],
-        ["3", onCompleteTaskCommand]
+        ["3", onCompleteTaskCommand],
     ]);
 
     for(;;) {
