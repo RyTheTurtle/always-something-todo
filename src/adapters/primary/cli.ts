@@ -5,12 +5,12 @@
 // that can wire up and use our applicaiton by connecting secondary adapters
 // and interacting with the application through it's primary port interface.
 
+import { todo } from "node:test";
 import promptSync, { Prompt } from "prompt-sync";
 import { Priority } from "../../application/domain";
 import { TodoFacade } from "../../application/service";
 import { ITodoService } from "../../ports/primaryPort";
 import { InMemoryRepo } from "../secondary/secondary";
-import { todo } from "node:test";
 
 export function cliAdapter() {
     // plug in our dependencies here.
@@ -23,7 +23,7 @@ export function cliAdapter() {
     let application: ITodoService = new TodoFacade(repo);
     const prompter = promptSync();
 
-    // maps user input commands to the functions that execute them. 
+    // maps user input commands to the functions that execute them.
     type PromptCommandHandler =  (a: promptSync.Prompt, b: ITodoService) => void;
     const promptHandlers: Map<string, PromptCommandHandler> = new Map([
         ["1", onCreateTodoListCommand],
@@ -34,10 +34,11 @@ export function cliAdapter() {
     while (true) {
         let userInput = getMenuSelection(prompter);
         let handler = promptHandlers.get(userInput);
-        if(handler){
+        if (handler){
             handler(prompter, application);
         } else {
             console.log("Invalid command!");
+            break;
         }
     }
 }
@@ -79,8 +80,8 @@ function onCompleteTaskCommand(prompter: promptSync.Prompt, application: ITodoSe
     let listId = prompter("What list should be updated?: ");
     let taskTitle = prompter("What task is completed?: ");
     let todoList = application.getTodoList(listId);
-    let completedTask = todoList?.tasks.filter(t => t.title === taskTitle)[0];
-    if(completedTask){
+    let completedTask = todoList?.tasks.filter((t) => t.title === taskTitle)[0];
+    if (completedTask){
         application.completeTask(completedTask, listId);
         console.log("Task marked complete!");
     } else {
