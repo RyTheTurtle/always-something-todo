@@ -1,4 +1,4 @@
-import { events, ITodoList } from "../application/domain";
+import { ITodoList, RegisteredEvent } from "../application/domain";
 
 export interface ITodoRepository {
     create(list: ITodoList): ITodoList | undefined;
@@ -7,6 +7,6 @@ export interface ITodoRepository {
 }
 
 export interface ITodoEventRepository {
-    write(e: events.RegisteredEvent) : void;
+    write(e: RegisteredEvent) : void;
     getTodoList(id: string): ITodoList | undefined;
 }

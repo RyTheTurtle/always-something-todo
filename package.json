@@ -4,7 +4,7 @@
   "description": "",
   "main": "main.js",
   "scripts": {
-    "prebuild": "npx eslint --fix .",
+    "prebuild": "npx eslint --fix src/*",
     "test": "jest",
     "start": "npx tsc && node dist/main.js"
   },

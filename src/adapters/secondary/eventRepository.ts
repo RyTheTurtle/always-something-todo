@@ -1,16 +1,16 @@
-import { events } from "../../application/domain";
+import { EventName, RegisteredEvent, TodoList, TodoListCreated } from "../../application/domain";
 import { ITodoEventRepository } from "../../ports/secondaryPort";
 // A simple in memory repository for persisting events and
 // fetching todo lists from those events.
 
 export class InMemoryEventRepo implements ITodoEventRepository {
-    events: events.RegisteredEvent[];
+    events: RegisteredEvent[];
 
     constructor() {
         this.events = [];
     }
 
-    write(e: events.RegisteredEvent): void {
+    write(e: RegisteredEvent): void {
         this.events.push(e);
     }
 
@@ -22,22 +22,22 @@ export class InMemoryEventRepo implements ITodoEventRepository {
      *
      * @param id the name or ID of the todo list to load
      */
-    public getTodoList(key: string): events.TodoList | undefined {
-        let result: events.TodoList | undefined = undefined;
+    public getTodoList(key: string): TodoList | undefined {
+        let result: TodoList | undefined = undefined;
         this.events.map((e) => {
             // our first event for the event id that we're looking for should be
             // the first event for LIST_CREATED that has the name or ID matching
             // the key
-            let isCreationEvent = (
+            const isCreationEvent = (
                 !result
-                && e.event_name == events.EventName.LIST_CREATED
-                && ((e as events.TodoListCreated).title === key
-                    || (e as events.TodoListCreated).id === key
+                && e.event_name == EventName.LIST_CREATED
+                && ((e as TodoListCreated).title === key
+                    || (e as TodoListCreated).id === key
                    )
             );
 
             if (!result && isCreationEvent){
-                result = new events.TodoList((e as events.TodoListCreated));
+                result = new TodoList((e as TodoListCreated));
             }
 
             if (result){

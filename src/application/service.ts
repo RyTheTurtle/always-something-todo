@@ -18,15 +18,15 @@ export class TodoFacade implements ITodoService {
     }
 
     public addTask(todoListId: string, task: ITask): ITask | undefined {
-        let list = this._getList(todoListId);
+        const list = this._getList(todoListId);
         list.tasks.push(task);
         this.repository.update(list);
         return task;
     }
 
     public completeTask(task: ITask, todoListId: string): void {
-        let list = this._getList(todoListId);
-        list.tasks.map((v, i) => {
+        const list = this._getList(todoListId);
+        list.tasks.map((v) => {
             if (v.id === task.id) {
                 v.completed = true;
             }
@@ -35,7 +35,7 @@ export class TodoFacade implements ITodoService {
     }
 
     private _getList(id: string): ITodoList {
-        let list = this.repository.read(id);
+        const list = this.repository.read(id);
 
         if (!list) {
             throw Error("invalid todo list Id");
