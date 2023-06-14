@@ -82,7 +82,7 @@ function onCompleteTaskCommand(prompter: promptSync.Prompt, application: ITodoSe
     const todoList = application.getTodoList(listId);
     const completedTask = todoList?.tasks.filter((t) => t.title === taskTitle)[0];
     if (completedTask){
-        application.completeTask(completedTask, listId);
+        application.completeTask(listId, completedTask);
         console.log("Task marked complete!");
     } else {
         console.error("Invalid task ID");

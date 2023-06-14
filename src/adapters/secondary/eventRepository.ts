@@ -28,15 +28,18 @@ export class InMemoryEventRepo implements ITodoEventRepository {
             // our first event for the event id that we're looking for should be
             // the first event for LIST_CREATED that has the name or ID matching
             // the key
+            const eventMatchesKey = (e: RegisteredEvent) => {
+                return ((e as TodoListCreated).title === key
+                         || (e as TodoListCreated).id === key)
+            }
+
             const isCreationEvent = (
                 !result
                 && e.event_name == EventName.LIST_CREATED
-                && ((e as TodoListCreated).title === key
-                    || (e as TodoListCreated).id === key
-                   )
+                && eventMatchesKey(e)
             );
 
-            if (!result && isCreationEvent){
+            if (isCreationEvent){
                 result = new TodoList((e as TodoListCreated));
             } else if(result) {
                 result.onEvent(e);

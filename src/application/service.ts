@@ -50,7 +50,7 @@ export class TodoFacade implements ITodoService {
         return task;
     }
 
-    public completeTask(task: ITask, todoListId: string): void {
+    public completeTask(todoListId: string, task: ITask): void {
         // we need to check if the task is already completed
         // before writing an event 
         const list = this.repository.getTodoList(todoListId);

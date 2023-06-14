@@ -1,7 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
 
 export enum Priority {
-    LOW, MED, HIGH
+    LOW = "low",
+    MED = "med",
+    HIGH = "high"
 }
 
 export interface ITask {
@@ -22,9 +24,9 @@ export interface ITodoList {
 }
 
 export enum EventName {
-    LIST_CREATED,
-    TASK_ADDED,
-    TASK_COMPLETED
+    LIST_CREATED = "list_created",
+    TASK_ADDED = "task_added",
+    TASK_COMPLETED = "task_completed"
 }
 
 export type RegisteredEvent = (TodoListCreated
@@ -64,7 +66,7 @@ export interface TaskCompleted extends DomainEvent {
     task_id: string;
 }
 
-export class TodoTask implements IProjection {
+export class TodoTask implements IProjection, ITask {
     id: string = uuidv4();
     title = "";
     description: string | undefined;
@@ -95,7 +97,7 @@ export class TodoTask implements IProjection {
     }
 }
 
-export class TodoList implements IProjection {
+export class TodoList implements IProjection, ITodoList {
     id: string = uuidv4();
     title = "";
     description: string | undefined;
