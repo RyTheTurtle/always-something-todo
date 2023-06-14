@@ -28,6 +28,7 @@ export function cliAdapter() {
         ["1", onCreateTodoListCommand],
         ["2", onAddTaskCommand],
         ["3", onCompleteTaskCommand],
+        ["4", onPrintEventLogCommand]
     ]);
 
     for(;;) {
@@ -86,6 +87,21 @@ function onCompleteTaskCommand(prompter: promptSync.Prompt, application: ITodoSe
     } else {
         console.error("Invalid task ID");
     }
+}
+
+function onPrintEventLogCommand(p: promptSync.Prompt, application: ITodoService): void {
+    // we're cheating a bit here, but this is mostly for debugging 
+    // and illustrative purposes to view the event log from our repository 
+    // normally, we wouldn't expose this internal data unless it was something 
+    // that was explicitly exposed through our primary port interface.
+    const eventLog = (application as TodoFacade).getEventLog();
+    console.log("Event Log: \n");
+    eventLog.map((e) => {
+        console.log(`\t${e.utc_timestamp} - ${e.event_name}`);
+        for(const [k,v] of Object.entries(e)){ 
+            console.log(`\t\t${k} : ${v}`)
+        }
+    })
 }
 
 function getMenuSelection(p: promptSync.Prompt): string {

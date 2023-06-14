@@ -38,9 +38,7 @@ export class InMemoryEventRepo implements ITodoEventRepository {
 
             if (!result && isCreationEvent){
                 result = new TodoList((e as TodoListCreated));
-            }
-
-            if (result){
+            } else if(result) {
                 result.onEvent(e);
             }
         });

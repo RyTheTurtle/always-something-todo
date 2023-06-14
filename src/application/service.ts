@@ -1,6 +1,7 @@
+import { InMemoryEventRepo } from "../adapters/secondary/eventRepository";
 import {ITodoService} from "../ports/primaryPort";
 import { ITodoEventRepository } from "../ports/secondaryPort";
-import { EventName, ITask, ITodoList, TaskAdded, TaskCompleted, TodoListCreated } from "./domain";
+import { EventName, ITask, ITodoList, RegisteredEvent, TaskAdded, TaskCompleted, TodoListCreated } from "./domain";
 import { v4 as uuid4 } from "uuid";
 
 export class TodoFacade implements ITodoService {
@@ -66,5 +67,12 @@ export class TodoFacade implements ITodoService {
             utc_timestamp: new Date().getTime()
         }
         this.repository.write(completedEvent)
+    }
+
+    // yes this normally wouldn't be public, but we're 
+    // sort of "cheating" here just for illustrative 
+    // purposes to be able to show the entire event log 
+    public getEventLog():RegisteredEvent[] {
+        return (this.repository as InMemoryEventRepo).events;
     }
 }
