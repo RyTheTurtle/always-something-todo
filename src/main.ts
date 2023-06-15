@@ -1,3 +1,4 @@
-import { cliAdapter } from "./adapters/primary/cli";
+import {server} from "./adapters/primary/server"
 
-cliAdapter();
+const port: number = +process.argv[2]
+server(port);

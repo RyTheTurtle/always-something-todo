@@ -126,10 +126,6 @@ export class TodoList implements IProjection, ITodoList {
     }
 
     private init = ( e: TodoListCreated): void => {
-        
-        for(const [k,v ] of Object.entries(e)){
-            console.log(`${k} : ${v}`)
-        }
         this.id = e.id;
         this.title = e.title;
         this.description = e.description;
