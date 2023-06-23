@@ -8,5 +8,7 @@ export interface ITodoRepository {
 
 export interface ITodoEventRepository {
     write(e: RegisteredEvent) : void;
+    // FIXME separate reading and writing to different
+    // interfaces. 
     getTodoList(id: string): ITodoList | undefined;
 }

@@ -1,12 +1,14 @@
 import { Application, Request, Response } from 'express';
 import express from 'express';
-import { InMemoryEventRepo } from '../secondary/eventRepository';
+import { AwsEventRepository, InMemoryEventRepo } from '../secondary/eventRepository';
 import { TodoFacade } from '../../application/service';
 import { ITodoService } from '../../ports/primaryPort';
-import { ITask, ITodoList } from '../../application/domain';
+import { ITask } from '../../application/domain';
 
-export function server(port: number){
+export async function server(port: number){
+ 
     const app : Application = express();
+
     // configure middleware 
     app.use(express.json());
 
