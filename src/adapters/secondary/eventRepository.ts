@@ -1,64 +1,15 @@
-import { EventName, ITodoList, RegisteredEvent, TodoList, TodoListCreated } from "../../application/domain";
-import { ITodoEventRepository } from "../../ports/secondaryPort";
 import { GetQueueUrlCommand,
          SendMessageCommand,
          SQSClient } from "@aws-sdk/client-sqs"
+import { ITodoRepository } from "../../ports/secondaryPort";
+import { RegisteredEvent } from "../../application/domain/event";
+import { TodoList } from "../../application/domain/aggregate";
  
-
-// A simple in memory repository for persisting events and
-// fetching todo lists from those events.
-
-export class InMemoryEventRepo implements ITodoEventRepository {
-    events: RegisteredEvent[];
-
-    constructor() {
-        this.events = [];
-    }
-
-    write(e: RegisteredEvent): void {
-        this.events.push(e);
-    }
-
-    /**
-     * Returns the current state of the ToDo list
-     * requested by rehydrating the Todo list by
-     * reading all of the events and applying the appropriate
-     * transformations on the todo list object.
-     *
-     * @param id the name or ID of the todo list to load
-     */
-    public getTodoList(key: string): TodoList | undefined {
-        let result: TodoList | undefined = undefined;
-        this.events.map((e) => {
-            // our first event for the event id that we're looking for should be
-            // the first event for LIST_CREATED that has the name or ID matching
-            // the key
-            const eventMatchesKey = (e: RegisteredEvent) => {
-                return ((e as TodoListCreated).title === key
-                         || (e as TodoListCreated).id === key)
-            }
-
-            const isCreationEvent = (
-                !result
-                && e.event_name == EventName.LIST_CREATED
-                && eventMatchesKey(e)
-            );
-
-            if (isCreationEvent){
-                result = new TodoList((e as TodoListCreated));
-            } else if(result) {
-                result.onEvent(e);
-            }
-        });
-        return result;
-    }
-}
-
 /**
  * AwsEventRepository implements a ITodoEventRepository that is connected to
  * Amazon SQS for publishing events to a queue. 
  */
-export class AwsEventRepository implements ITodoEventRepository {
+export class AwsEventRepository implements ITodoRepository {
     private sqsClient: SQSClient;
     //FIXME DON'T HARDCODE THE QUEUE NAME, CONFIGURE IT INSTEAD
     private SQS_QUEUE_NAME = 'TodoEventQueue';
@@ -69,6 +20,16 @@ export class AwsEventRepository implements ITodoEventRepository {
         // and session from local aws cli config file.
         this.sqsClient = client; 
     }   
+
+    read(list_id: string): TodoList | undefined {
+        // FIXME read events or projection from a database  
+        throw new Error("Method not implemented.");
+    }
+
+    save(list: TodoList): undefined {
+        // FIXME publish new events without publishing old events to sqs 
+        throw new Error("Method not implemented.");
+    }
 
     write = async (e: RegisteredEvent) => {
         await this.getSqsUrl();
@@ -97,7 +58,7 @@ export class AwsEventRepository implements ITodoEventRepository {
         return this.SQS_QUEUE_URL;
     }
     
-    getTodoList(id: string): ITodoList | undefined {
+    getTodoList(id: string): TodoList | undefined {
         throw new Error("Method not implemented.");
     } 
 

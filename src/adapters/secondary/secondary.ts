@@ -1,31 +1,21 @@
-import { v4 as uuidv4 } from "uuid";
-import { ITodoList } from "../../application/domain";
+import { v4 as uuidv4 } from "uuid"; 
 import { ITodoRepository } from "../../ports/secondaryPort";
+import { TodoList } from "../../application/domain/aggregate";
 
 export class InMemoryRepo implements ITodoRepository {
-    private data: Map<string, ITodoList>;
+    private data: Map<string, TodoList>;
 
     constructor() {
-        this.data = new Map<string, ITodoList>();
+        this.data = new Map<string, TodoList>();
+    }
+    
+    read(list_id: string): TodoList | undefined {
+        return this.data.get(list_id);
     }
 
-    public create(list: ITodoList): ITodoList | undefined {
-        list.id = uuidv4();
+    save(list: TodoList): undefined {
+        // for simplicity of lookups, also key it 
+        this.data.set(list.title, list);
         this.data.set(list.id, list);
-        return list;
     }
-
-    public read(id: string): ITodoList | undefined {
-        return this.data.get(id);
-    }
-
-    public update(list: ITodoList): ITodoList | undefined {
-        if (list && list.id !== undefined) {
-            this.data.set(list.id, list);
-            return list;
-        } else {
-            return undefined;
-        }
-    }
-
 }

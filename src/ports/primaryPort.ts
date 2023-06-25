@@ -1,8 +1,9 @@
-import { ITask, ITodoList } from "../application/domain";
+import { AddTaskCommand, CompleteTaskCommand, CreateTodoListCommand } from "../application/domain/command";
+import { TodoList, TodoTask } from "../application/domain/aggregate";
 
-export interface ITodoService {
-    createTodoList(list: ITodoList): ITodoList | undefined;
-    getTodoList(id: string): ITodoList | undefined;
-    addTask(todoListId: string, task: ITask): ITask | undefined;
-    completeTask(todoListId: string, task: ITask): void;
+ export interface ITodoService {
+    createTodoList(c: CreateTodoListCommand): TodoList | undefined;
+    getTodoList(id: string): TodoList | undefined;
+    addTask(c: AddTaskCommand): TodoTask | undefined;
+    completeTask(c: CompleteTaskCommand): void;
 }

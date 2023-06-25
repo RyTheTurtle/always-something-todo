@@ -1,78 +1,78 @@
-import { InMemoryEventRepo } from "../adapters/secondary/eventRepository";
 import {ITodoService} from "../ports/primaryPort";
-import { ITodoEventRepository } from "../ports/secondaryPort";
-import { EventName, ITask, ITodoList, RegisteredEvent, TaskAdded, TaskCompleted, TodoListCreated } from "./domain";
+import { ITodoRepository } from "../ports/secondaryPort";
 import { v4 as uuid4 } from "uuid";
+import { CreateTodoListCommand, AddTaskCommand, CompleteTaskCommand } from "./domain/command";
+import { TodoList, TodoTask } from "./domain/aggregate";
+import { EventName, TaskAddedToList, TaskCompleted, TodoListCreated } from "./domain/event";
 
 export class TodoFacade implements ITodoService {
-    private repository: ITodoEventRepository;
+    private repository: ITodoRepository;
 
-    constructor(repo: ITodoEventRepository) {
+    constructor(repo: ITodoRepository) {
         this.repository = repo;
     }
 
-    public createTodoList(list: ITodoList): ITodoList | undefined {
-        // create a new write event for a todo repository
-        const todoCreatedEvent: TodoListCreated = {
+    createTodoList(c: CreateTodoListCommand): TodoList | undefined {
+        const todo_list = new TodoList();
+        const list_created_event: TodoListCreated = {
             event_name: EventName.LIST_CREATED,
-            title: list.title,
-            id: uuid4(),
-            description: list.description,
-            due_by: list.due_by,
-            event_id: "",
-            utc_timestamp: new Date().getTime()
+            title: c.details.title,
+            list_id: uuid4(),
+            description: c.details.description,
+            due_by: c.details.due_by,
+            event_id: uuid4(),
+            version: 0,
+            utc_timestamp: c.timestamp_utc
         }
-        this.repository.write(todoCreatedEvent);
-        return list;
+        todo_list.apply(list_created_event);
+        this.repository.save(todo_list);
+        return todo_list;
     }
 
-    public getTodoList(id: string): ITodoList | undefined {
-        return this.repository.getTodoList(id);
+    getTodoList(id: string): TodoList | undefined {
+        return this.repository.read(id);
     }
 
-    public addTask(todoListId: string, task: ITask): ITask | undefined {
-        const existingList = this.repository.getTodoList(todoListId);
-        if(!existingList){
-            throw Error("Invalid To-Do List");
+    addTask(c: AddTaskCommand): TodoTask | undefined {
+        const todo_list = this.repository.read(c.details.list_id);
+        if(!todo_list){
+            throw new Error("invalid_list_id");
         }
-        const newTaskEvent : TaskAdded = {
-            event_name: EventName.TASK_ADDED,
-            list_id: existingList.id ?? "",
+        const task_added_event: TaskAddedToList = {
+            event_name: EventName.TASK_ADDED_TO_LIST,
+            list_id: c.details.list_id,
             task_id: uuid4(),
-            title: task.title,
-            description: task.description,
-            due_by: task.due_by,
-            priority: task.priority,
+            title: c.details.title,
+            description: c.details.description,
+            due_by: c.details.due_by,
+            priority: c.details.priority,
             event_id: uuid4(),
-            utc_timestamp: new Date().getTime()
+            version: todo_list.version + 1,
+            utc_timestamp: c.timestamp_utc
         }
-        this.repository.write(newTaskEvent);
-        return task;
+        todo_list.apply(task_added_event);
+        this.repository.save(todo_list);
+        return todo_list.tasks
+                .filter(t => t.id === task_added_event.task_id)
+                .pop()
     }
 
-    public completeTask(todoListId: string, task: ITask): void {
-        // we need to check if the task is already completed
-        // before writing an event 
-        const list = this.repository.getTodoList(todoListId);
-        const existingTask = list?.tasks.filter((t)=> t.id === task.id 
-                                                   && !t.completed);
-        if(!existingTask) {
-            throw Error("Task is missing or already completed!")
+    completeTask(c: CompleteTaskCommand): void {
+        const todo_list = this.repository.read(c.details.list_id);
+        if(!todo_list){
+            throw new Error("invalid_list_id");
         }
-        const completedEvent : TaskCompleted = {
+
+        const completed_event : TaskCompleted = {
             event_name: EventName.TASK_COMPLETED,
-            list_id: todoListId,
-            task_id: task.id ?? "",
+            list_id: c.details.list_id,
+            task_id: c.details.task_id,
             event_id: uuid4(),
-            utc_timestamp: new Date().getTime()
+            version: todo_list?.version + 1,
+            utc_timestamp: c.timestamp_utc
         }
-        this.repository.write(completedEvent)
-    }
 
-    // yes this normally wouldn't be public, but we're 
-    // sort of "cheating" here just for illustrative 
-    // purposes to be able to show the entire event log 
-    public getEventLog():RegisteredEvent[] {
-        return (this.repository as InMemoryEventRepo).events;
+        todo_list.apply(completed_event);
+        this.repository.save(todo_list);
     }
 }

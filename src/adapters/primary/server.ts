@@ -1,9 +1,10 @@
 import { Application, Request, Response } from 'express';
 import express from 'express';
-import { AwsEventRepository, InMemoryEventRepo } from '../secondary/eventRepository';
 import { TodoFacade } from '../../application/service';
 import { ITodoService } from '../../ports/primaryPort';
-import { ITask } from '../../application/domain';
+import { InMemoryRepo } from '../secondary/secondary';
+import { COMMAND_NAME } from '../../application/domain/command';
+import { Priority } from '../../application/domain/event';
 
 export async function server(port: number){
  
@@ -15,7 +16,7 @@ export async function server(port: number){
     // configure our service facade from the application 
     // and attach it to 'app' so we can refer to it in 
     // our handler functions. 
-    const repository = new InMemoryEventRepo();
+    const repository = new InMemoryRepo();
     const serviceFacade = new TodoFacade(repository);
     app.set("facade",serviceFacade);
     // register routes
@@ -65,8 +66,17 @@ function addTodoListTask(req: Request, resp: Response): void {
     resp.status(201).contentType("application/json");
     try {
         // TODO add some schema validation here 
-        facade.addTask(req.params.id, req.body);
-        const updatedList = facade.getTodoList(req.params.id);
+        const updatedList = facade.addTask({
+            name: COMMAND_NAME.ADD_TASK,
+            timestamp_utc: (new Date()).getTime(),
+            details: {
+                list_id: req.params.id,
+                title: req.body.title,
+                description: req.body.description,
+                due_by: req.body.due_by,
+                priority: req.body.priority ?? Priority.LOW
+            }
+        })
         resp.send(JSON.stringify(updatedList));
     } catch(e) {
         onError(resp, e);
@@ -78,20 +88,14 @@ function completeTask(req: Request, resp: Response): void {
     resp.status(201).contentType("application/json");
     try {
         // TODO add some schema validation here 
-        const list = facade.getTodoList(req.params.id);
-        if(!list){ 
-            throw Error("invalid todo list");
-        }
-
-        const task: unknown = list.tasks
-            .filter((t)=> t.id === req.params.list_id || t.title === req.params.list_id)
-            .reduce((_, nextTask) => nextTask, {});
-
-        if(!task) { 
-            throw Error("invalid task id");
-        }
-        facade.completeTask(req.params.list_id, task as ITask);
-        const updatedList = facade.getTodoList(req.params.id);
+        const updatedList = facade.completeTask({
+            name: COMMAND_NAME.SET_TASK_COMPLETED,
+            timestamp_utc: (new Date()).getTime(),
+            details: {
+                list_id: req.params.id,
+                task_id: req.params.task_id
+            }
+        });
         resp.send(JSON.stringify(updatedList));
     } catch(e) {
         onError(resp, e);

@@ -1,6 +1,6 @@
 import {server} from "./adapters/primary/server"
 
-const port: number = +process.argv[2]
+let port: number = +process.argv[2]
 
 // we create an async main function that can be used to await the 
 // async server function. This is primarily due to the fact that 
@@ -8,6 +8,9 @@ const port: number = +process.argv[2]
 // for async/await dictate that any async function calls only happen
 // from other async functions. 
 const main = async ()=> {
+    if (Number.isNaN(port)){
+        port = 3001
+    }
     await server(port);
 }
 

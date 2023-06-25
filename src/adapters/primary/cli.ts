@@ -6,10 +6,11 @@
 // and interacting with the application through it's primary port interface.
 
 import promptSync, { Prompt } from "prompt-sync";
-import { Priority } from "../../application/domain";
 import { TodoFacade } from "../../application/service";
 import { ITodoService } from "../../ports/primaryPort"; 
-import { InMemoryEventRepo } from "../secondary/eventRepository";
+import { InMemoryRepo } from "../secondary/secondary";
+import { AddTaskCommand, COMMAND_NAME, CompleteTaskCommand, CreateTodoListCommand } from "../../application/domain/command";
+import { Priority } from "../../application/domain/event";
 
 export function cliAdapter() {
     // plug in our dependencies here.
@@ -18,7 +19,7 @@ export function cliAdapter() {
     // dependencies to this function. Effectively, this would just be
     // our 'main' function.
 
-    const repo = new InMemoryEventRepo();
+    const repo = new InMemoryRepo();
     const application: ITodoService = new TodoFacade(repo);
     const prompter = promptSync();
 
@@ -28,7 +29,6 @@ export function cliAdapter() {
         ["1", onCreateTodoListCommand],
         ["2", onAddTaskCommand],
         ["3", onCompleteTaskCommand],
-        ["4", onPrintEventLogCommand]
     ]);
 
     for(;;) {
@@ -44,14 +44,17 @@ export function cliAdapter() {
 }
 
 function onCreateTodoListCommand(prompter: promptSync.Prompt, application: ITodoService) {
-    const listTitle = prompter("What is the Todo List title?: ");
-    application.createTodoList({
-        description: undefined,
-        due_by: undefined,
-        id: undefined,
-        tasks: [],
-        title: listTitle
-    });
+    const list_title = prompter("What is the Todo List title?: ");
+    const command: CreateTodoListCommand = {
+        name: COMMAND_NAME.CREATE_TODO_LIST,
+        timestamp_utc: (new Date()).getTime(),
+        details: {
+            title: list_title,
+            description: undefined,
+            due_by: undefined
+        }
+    }
+    application.createTodoList(command);
     console.log("Created Todo List!");
 }
 
@@ -59,17 +62,34 @@ function onAddTaskCommand(prompter: promptSync.Prompt, application: ITodoService
     // TODO would make more sense to have them enter a title
     // instead of a list ID, but would need to make that a
     // supported feature in the application layer first.
-    const listId = prompter("What list do you want to update?: ");
-    const taskTitle = prompter("What task do you want to add?: ");
-    const newTask = {
-        completed: false,
-        description: undefined,
-        due_by: undefined,
-        id: undefined,
-        priority: Priority.LOW,
-        title: taskTitle,
-    };
-    application.addTask(listId, newTask);
+    const list_id = prompter("What list do you want to update?: ");
+    const task_title = prompter("What task do you want to add?: ");
+    const task_priority = prompter("What is the priority? (low, med, high)?: ");
+    const lu_priority = new Map<string, Priority>(
+        [
+            ["low",Priority.LOW],
+            ["med",Priority.MED],
+            ["high", Priority.HIGH]
+        ]
+    );
+
+    const priority = lu_priority.get(task_priority.toLowerCase()); 
+    if(!priority){
+        throw new Error("invalid priority");
+    }
+
+    const command: AddTaskCommand = {
+        name: COMMAND_NAME.ADD_TASK,
+        timestamp_utc: (new Date()).getTime(),
+        details: {
+            list_id: list_id,
+            title: task_title,
+            description: undefined,
+            due_by: undefined,
+            priority: priority
+        }
+    }
+    application.addTask(command);
     console.log("Updated list!");
 }
 
@@ -77,32 +97,20 @@ function onCompleteTaskCommand(prompter: promptSync.Prompt, application: ITodoSe
     // TODO would make more sense to have them enter a title
     // instead of a list ID, but would need to make that a
     // supported feature in the application layer first.
-    const listId = prompter("What list should be updated?: ");
-    const taskTitle = prompter("What task is completed?: ");
-    const todoList = application.getTodoList(listId);
-    const completedTask = todoList?.tasks.filter((t) => t.title === taskTitle)[0];
-    if (completedTask){
-        application.completeTask(listId, completedTask);
-        console.log("Task marked complete!");
-    } else {
-        console.error("Invalid task ID");
+    const list_id = prompter("What list should be updated?: ");
+    const task_id = prompter("What task is completed?: ");
+    const command :CompleteTaskCommand = {
+        name: COMMAND_NAME.SET_TASK_COMPLETED,
+        timestamp_utc: (new Date()).getTime(),
+        details: {
+            list_id: list_id,
+            task_id: task_id
+        }
     }
+    application.completeTask(command)
 }
 
-function onPrintEventLogCommand(p: promptSync.Prompt, application: ITodoService): void {
-    // we're cheating a bit here, but this is mostly for debugging 
-    // and illustrative purposes to view the event log from our repository 
-    // normally, we wouldn't expose this internal data unless it was something 
-    // that was explicitly exposed through our primary port interface.
-    const eventLog = (application as TodoFacade).getEventLog();
-    console.log("Event Log: \n");
-    eventLog.map((e) => {
-        console.log(`\t${e.utc_timestamp} - ${e.event_name}`);
-        for(const [k,v] of Object.entries(e)){ 
-            console.log(`\t\t${k} : ${v}`)
-        }
-    })
-}
+
 
 function getMenuSelection(p: promptSync.Prompt): string {
     const menu = `
@@ -115,7 +123,6 @@ function getMenuSelection(p: promptSync.Prompt): string {
         2. Add a task to a todo list 
         3. Mark a task completed
         4. View a Todo list  
-
     >
     `;
     return p(menu);
