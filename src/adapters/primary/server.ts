@@ -3,7 +3,7 @@ import express from 'express';
 import { TodoFacade } from '../../application/service';
 import { ITodoService } from '../../ports/primaryPort';
 import { InMemoryRepo } from '../secondary/secondary';
-import { COMMAND_NAME } from '../../application/domain/command';
+import { COMMAND_NAME, CreateTodoListCommand } from '../../application/domain/command';
 import { Priority } from '../../application/domain/event';
 
 export async function server(port: number){
@@ -52,9 +52,18 @@ function getTodoList(req: Request, resp: Response) : void {
 function createTodoList(req: Request, resp: Response): void {
     const facade: ITodoService = req.app.get("facade");
     resp.status(201).contentType("application/json");
+    console.log(req.body)
     try {
         // TODO add some schema validation here 
-        const result = facade.createTodoList(req.body);
+        const result = facade.createTodoList({
+            name: COMMAND_NAME.CREATE_TODO_LIST,
+            timestamp_utc: (new Date()).getTime(),
+            details: {
+                title: req.body.title,
+                description: req.body.description,
+                due_by: req.body.due_by
+            }
+        });
         resp.send(JSON.stringify(result));
     } catch(e) {
         onError(resp, e);

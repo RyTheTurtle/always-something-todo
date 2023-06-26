@@ -6,7 +6,7 @@ import {v4 as uuidv4} from "uuid";
  * relevant events are captured 
  */
 abstract class IAggregate { 
-    private changes: RegisteredEvent[] = [];
+    protected changes: RegisteredEvent[] = [];
     abstract id: string;
     abstract version: number;
 
@@ -32,15 +32,24 @@ abstract class IAggregate {
         }
     }
 
+    getChanges = () => {
+        return this.changes;
+    }
+
     abstract when(e: RegisteredEvent): void;
+}
+
+// add an interface for clonable 
+interface ICopy {
+   copy(): any 
 }
 
 /**
  * TodoList is an aggregate root that represents a To-Do list.
  */
-export class TodoList extends IAggregate { 
+export class TodoList extends IAggregate implements ICopy { 
     id = uuidv4();
-    version = 0;
+    version = -1; // start at -1 since genesis event is event 0
     title = "";
     description: string | undefined;
     due_by: number | undefined;
@@ -51,6 +60,12 @@ export class TodoList extends IAggregate {
         if (created_event){ 
             this.init(created_event);
         }
+    }
+
+    copy = (): TodoList => {
+        const result: TodoList = new TodoList();
+        this.changes.forEach(c => result.apply(c))
+        return result;
     }
 
     public when = ( e: RegisteredEvent): void => {
@@ -72,6 +87,7 @@ export class TodoList extends IAggregate {
         this.title = e.title;
         this.description = e.description;
         this.due_by = e.due_by;
+        this.version = 0;
     }
 
     private addTask = ( e: TaskAddedToList): void => {
