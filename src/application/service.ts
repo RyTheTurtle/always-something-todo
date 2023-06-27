@@ -12,7 +12,7 @@ export class TodoFacade implements ITodoService {
         this.repository = repo;
     }
 
-    createTodoList(c: CreateTodoListCommand): TodoList | undefined {
+    async createTodoList(c: CreateTodoListCommand): Promise<TodoList | undefined> {
         const todo_list = new TodoList();
         const list_created_event: TodoListCreated = {
             event_name: EventName.LIST_CREATED,

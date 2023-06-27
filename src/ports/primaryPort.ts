@@ -2,7 +2,7 @@ import { AddTaskCommand, CompleteTaskCommand, CreateTodoListCommand } from "../a
 import { TodoList, TodoTask } from "../application/domain/aggregate";
 
  export interface ITodoService {
-    createTodoList(c: CreateTodoListCommand): TodoList | undefined;
+    createTodoList(c: CreateTodoListCommand): Promise<TodoList | undefined>;
     getTodoList(id: string): TodoList | undefined;
     addTask(c: AddTaskCommand): TodoTask | undefined;
     completeTask(c: CompleteTaskCommand): void;

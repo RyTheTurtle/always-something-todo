@@ -3,12 +3,14 @@ import express from 'express';
 import { TodoFacade } from '../../application/service';
 import { ITodoService } from '../../ports/primaryPort';
 import { InMemoryRepo } from '../secondary/secondary';
-import { COMMAND_NAME, CreateTodoListCommand } from '../../application/domain/command';
+import { COMMAND_NAME } from '../../application/domain/command';
 import { Priority } from '../../application/domain/event';
+import { AwsEventRepository } from '../secondary/eventRepository';
+import { SQSClient } from '@aws-sdk/client-sqs';
 
 export async function server(port: number){
  
-    const app : Application = express();
+    const app : Application = express(); 
 
     // configure middleware 
     app.use(express.json());
@@ -16,7 +18,7 @@ export async function server(port: number){
     // configure our service facade from the application 
     // and attach it to 'app' so we can refer to it in 
     // our handler functions. 
-    const repository = new InMemoryRepo();
+    const repository = new AwsEventRepository(new SQSClient({}))
     const serviceFacade = new TodoFacade(repository);
     app.set("facade",serviceFacade);
     // register routes
@@ -49,7 +51,7 @@ function getTodoList(req: Request, resp: Response) : void {
     
 }  
 
-function createTodoList(req: Request, resp: Response): void {
+async function createTodoList(req: Request, resp: Response): Promise<void> {
     const facade: ITodoService = req.app.get("facade");
     resp.status(201).contentType("application/json");
     console.log(req.body)

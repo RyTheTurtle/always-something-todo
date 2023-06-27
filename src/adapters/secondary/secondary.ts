@@ -13,7 +13,7 @@ export class InMemoryRepo implements ITodoRepository {
         return this.data.get(list_id)?.copy();
     }
 
-    save(list: TodoList): undefined {
+    save(list: TodoList): Promise<undefined> {
         // implement concurrency control here by checking 
         // the latest version in the "database" and seeing 
         // what events we actually need to persist from the
@@ -36,5 +36,6 @@ export class InMemoryRepo implements ITodoRepository {
         // for simplicity of lookups, also key it 
         this.data.set(list.title, list);
         this.data.set(list.id, list);
+        return new Promise(()=> undefined)
     }
 }
