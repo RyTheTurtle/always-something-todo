@@ -1,0 +1,5 @@
+# run these commands to set environment variable defaults. mostly for dev debugging 
+export QUEUE_URL=https://sqs.us-east-1.amazonaws.com/589289541767/devo_todo.fifo
+export QUEUE_WAIT_TIMEOUT=10
+export QUEUE_VISIBILITY_TIMEOUT=10
+export QUEUE_RECV_MAX_MESSAGES=10

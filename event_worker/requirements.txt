@@ -1,0 +1,4 @@
+boto3
+types-boto3
+botocore-stubs
+boto3-stubs
