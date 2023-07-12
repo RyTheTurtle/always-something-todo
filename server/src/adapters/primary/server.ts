@@ -1,8 +1,7 @@
 import { Application, Request, Response } from 'express';
 import express from 'express';
 import { TodoFacade } from '../../application/service';
-import { ITodoService } from '../../ports/primaryPort';
-import { InMemoryRepo } from '../secondary/secondary';
+import { ITodoService } from '../../ports/primaryPort'; 
 import { COMMAND_NAME } from '../../application/domain/command';
 import { Priority } from '../../application/domain/event';
 import { AwsEventRepository } from '../secondary/eventRepository';
@@ -18,7 +17,9 @@ export async function server(port: number){
     // configure our service facade from the application 
     // and attach it to 'app' so we can refer to it in 
     // our handler functions. 
-    const repository = new AwsEventRepository(new SQSClient({}))
+    const DEFAULT_DELAY = 1;
+    const repository = new AwsEventRepository(new SQSClient({region: process.env.AWS_REGION}), undefined, DEFAULT_DELAY); 
+
     const serviceFacade = new TodoFacade(repository);
     app.set("facade",serviceFacade);
     // register routes
